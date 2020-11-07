@@ -11,7 +11,8 @@
         }
     ],
     "require": {
-        "moxuandi/yii2": "~2.0.35"
+        "php": ">=7.2.0",
+        "moxuandi/yii2": "~2.0.30"
     },
     "autoload": {
         "psr-4": {
