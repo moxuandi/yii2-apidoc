@@ -10,7 +10,6 @@ use yii\web\AssetBundle;
  */
 class LoginAsset extends AssetBundle
 {
-    public $sourcePath = '@vendor/moxuandi/yii2-apidoc/assets';
     public $css = [
         'https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css',
     ];

@@ -10,7 +10,6 @@ use yii\web\AssetBundle;
  */
 class AppAsset extends AssetBundle
 {
-    public $sourcePath = '@vendor/moxuandi/yii2-apidoc/assets';
     public $css = [
         'https://cdn.jsdelivr.net/npm/jquery.json-viewer@1.4.0/json-viewer/jquery.json-viewer.css',
     ];
