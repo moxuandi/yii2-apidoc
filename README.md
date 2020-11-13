@@ -15,3 +15,18 @@ composer require moxuandi/yii2-apidoc:"~1.0.0"
 # 开发版:
 composer require moxuandi/yii2-apidoc:"dev-master"
 ```
+
+使用:
+------------
+
+将下方配置添加到入口文件`web/index-dev.php`或配置文件`frontend/config/main-local.php`(*** 正式环境不要引入***）：
+
+```
+$config['modules']['docs'] = [
+    'class' => 'moxuandi\apidoc\Module',
+    'appName' => 'api',
+    'name' => '接口调试系统',
+    'baseUrl' => 'http://example.com',
+    'password' => '123456',
+];
+```

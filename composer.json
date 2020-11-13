@@ -12,11 +12,12 @@
     ],
     "require": {
         "php": ">=7.2.0",
-        "yiisoft/yii2": "~2.0.35"
+        "yiisoft/yii2": "~2.0.35",
+        "ext-json": "*"
     },
     "autoload": {
         "psr-4": {
-            "moxuandi\\apidoc\\": ""
+            "moxuandi\\apidoc\\": "src/"
         }
     }
 }
