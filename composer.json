@@ -1,19 +1,18 @@
 {
     "name": "moxuandi/yii2-apidoc",
-    "description": "yii2 api doc",
     "type": "yii2-extension",
-    "keywords": ["yii2","api","doc"],
+    "description": "Yii2 通过API动作方法的注释，自动生成可阅读可调试的API文档, 注释即文档, 可作为调试工具(postman). Simple documentation generator for Yii2 REST applications based on defined API endpoints and actions annotations.",
+    "keywords": ["yii2","api","doc","generator","documentation","docs"],
     "license": "MIT",
-    "authors": [
-        {
-            "name": "moxuandi",
-            "email": "1104984259@qq.com"
-        }
-    ],
+    "authors": [{
+        "name": "moxuandi",
+        "email": "1104984259@qq.com"
+    }],
     "require": {
         "php": ">=7.2.0",
+        "ext-json": "*",
         "yiisoft/yii2": "~2.0.35",
-        "ext-json": "*"
+        "phpdocumentor/reflection-docblock": "~2.0.4"
     },
     "autoload": {
         "psr-4": {

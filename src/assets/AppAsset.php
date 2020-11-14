@@ -6,7 +6,11 @@ use yii\web\AssetBundle;
 
 /**
  * Class AppAsset
- * @package moxuandi\apidoc\assets
+ *
+ * @author zhangmoxuan <1104984259@qq.com>
+ * @link http://www.zhangmoxuan.com
+ * @QQ 1104984259
+ * @Date 2020-11-14
  */
 class AppAsset extends AssetBundle
 {

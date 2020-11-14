@@ -9,7 +9,11 @@ use yii\web\ForbiddenHttpException;
 
 /**
  * Class Module
- * @package moxuandi\apidoc
+ *
+ * @author zhangmoxuan <1104984259@qq.com>
+ * @link http://www.zhangmoxuan.com
+ * @QQ 1104984259
+ * @Date 2020-11-14
  */
 class Module extends \yii\base\Module
 {

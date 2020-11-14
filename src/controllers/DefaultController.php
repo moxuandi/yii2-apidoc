@@ -19,7 +19,11 @@ use yii\web\Controller;
 
 /**
  * Class DefaultController
- * @package moxuandi\apidoc\controllers
+ *
+ * @author zhangmoxuan <1104984259@qq.com>
+ * @link http://www.zhangmoxuan.com
+ * @QQ 1104984259
+ * @Date 2020-11-14
  */
 class DefaultController extends Controller
 {

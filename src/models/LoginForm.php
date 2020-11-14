@@ -7,6 +7,11 @@ use yii\base\Model;
 
 /**
  * LoginForm is the model behind the login form.
+ *
+ * @author zhangmoxuan <1104984259@qq.com>
+ * @link http://www.zhangmoxuan.com
+ * @QQ 1104984259
+ * @Date 2020-11-14
  */
 class LoginForm extends Model
 {
@@ -23,11 +28,8 @@ class LoginForm extends Model
     public function rules()
     {
         return [
-            // username and password are both required
             [['password'], 'required'],
-            // rememberMe must be a boolean value
             ['rememberMe', 'boolean'],
-            // password is validated by validatePassword()
             ['password', 'validatePassword'],
         ];
     }
@@ -35,7 +37,6 @@ class LoginForm extends Model
     /**
      * Validates the password.
      * This method serves as the inline validation for password.
-     *
      * @param string $attribute the attribute currently being validated
      * @param array $params the additional name-value pairs given in the rule
      */
@@ -43,7 +44,6 @@ class LoginForm extends Model
     {
         if (!$this->hasErrors()) {
             $user = $this->getUser();
-
             if (!$user || !$user->validatePassword($this->password)) {
                 $this->addError($attribute, 'Incorrect username or password.');
             }
@@ -65,17 +65,13 @@ class LoginForm extends Model
 
     /**
      * Finds user by [[username]]
-     *
      * @return User|null
      */
     public function getUser()
     {
         if ($this->_user === false) {
             $this->_user = User::findByUsername($this->username);
-//            var_dump($this->module->password);exit();
-//            $this->_user = User::getUserInstance($this->username,$this->module->password);
         }
-
         return $this->_user;
     }
 }

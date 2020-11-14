@@ -6,6 +6,14 @@ use Yii;
 use yii\base\BaseObject;
 use yii\web\IdentityInterface;
 
+/**
+ * Class User
+ *
+ * @author zhangmoxuan <1104984259@qq.com>
+ * @link http://www.zhangmoxuan.com
+ * @QQ 1104984259
+ * @Date 2020-11-14
+ */
 class User extends BaseObject implements IdentityInterface
 {
     public $id;
@@ -25,7 +33,8 @@ class User extends BaseObject implements IdentityInterface
     ];
 
     /**
-     * @inheritdoc
+     * @param int|string $id
+     * @return IdentityInterface|static|null
      */
     public static function findIdentity($id)
     {
@@ -33,44 +42,41 @@ class User extends BaseObject implements IdentityInterface
     }
 
     /**
-     * @inheritdoc
+     * @param mixed $token
+     * @param null $type
+     * @return IdentityInterface|static|null
      */
     public static function findIdentityByAccessToken($token, $type = null)
     {
         foreach (self::$users as $user) {
             if ($user['accessToken'] === $token) {
-                return new static([
-                    'id' => '100',
-                    'username' => 'admin',
-                    'authKey' => 'test100key',
-                    'accessToken' => '100-token',
-                    'password' => self::$passwordSetting
-                ]);
+                return new static(array_merge($user, [
+                    'password' => self::$passwordSetting,
+                ]));
             }
         }
-
         return null;
     }
 
     /**
      * Finds user by username
-     *
      * @param string $username
      * @return static|null
      */
     public static function findByUsername($username)
     {
-        return new static([
-            'id' => '100',
-            'username' => 'admin',
-            'authKey' => 'test100key',
-            'accessToken' => '100-token',
-            'password' => self::$passwordSetting
-        ]);
+        foreach (self::$users as $user) {
+            if ($user['username'] === $username) {
+                return new static(array_merge($user, [
+                    'password' => self::$passwordSetting,
+                ]));
+            }
+        }
+        return null;
     }
 
     /**
-     * @inheritdoc
+     * @return int|string
      */
     public function getId()
     {
@@ -78,7 +84,7 @@ class User extends BaseObject implements IdentityInterface
     }
 
     /**
-     * @inheritdoc
+     * @return string
      */
     public function getAuthKey()
     {
@@ -86,7 +92,8 @@ class User extends BaseObject implements IdentityInterface
     }
 
     /**
-     * @inheritdoc
+     * @param string $authKey
+     * @return bool
      */
     public function validateAuthKey($authKey)
     {
@@ -95,7 +102,6 @@ class User extends BaseObject implements IdentityInterface
 
     /**
      * Validates password
-     *
      * @param string $password password to validate
      * @return boolean if password provided is valid for current user
      */
