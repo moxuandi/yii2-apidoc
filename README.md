@@ -16,6 +16,14 @@ composer require moxuandi/yii2-apidoc:"~1.0.0"
 composer require moxuandi/yii2-apidoc:"dev-master"
 ```
 
+演示效果:
+------------
+
+![example-1.png](dist/example-1.png)
+![example-2.png](dist/example-2.png)
+![example-3.png](dist/example-3.png)
+
+
 使用:
 ------------
 
