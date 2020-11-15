@@ -10,10 +10,10 @@
 ------------
 使用 [composer](http://getcomposer.org/download/) 下载:
 ```
-composer require moxuandi/yii2-apidoc:"~1.0.0"
+composer require moxuandi/yii2-apidoc:"~1.0.0" --dev
 
 # 开发版:
-composer require moxuandi/yii2-apidoc:"dev-master"
+composer require moxuandi/yii2-apidoc:"dev-master" --dev
 ```
 
 演示效果:
