@@ -13,7 +13,7 @@ AppAsset::register($this);
 
 $this->title = $name;
 $this->registerJs("var baseUrl='{$baseUrl}';var apiData={$apiData};", $this::POS_END);
-$this->registerJs($this->render('index.min.js'), $this::POS_END);
+$this->registerJs($this->render('index.js'), $this::POS_END);
 ?>
 <?php $this->beginPage(); Spaceless::begin(); ?>
 <!DOCTYPE html>
@@ -26,19 +26,19 @@ $this->registerJs($this->render('index.min.js'), $this::POS_END);
 <?php $this->head() ?>
 <?php $this->registerCsrfMetaTags() ?>
 <style>
-    .wrap-body{margin-top:4.5rem;padding-bottom:2rem}
-    .wrap-body .card .card-header{padding:0}
-    .wrap-body .card .list-group-item{padding:.375rem .75rem}
-    .wrap-body p{font-size:.875rem;margin-bottom:.625rem}
-    .wrap-body pre{padding:.5rem;font-size:.8125rem;word-break:break-all;word-wrap:break-word;background-color:#f5f5f5;border:.0625rem solid #ccc;border-radius:.25rem}
-    .wrap-body .tab-content .card + .card{margin-top:1rem}
-    .wrap-body .tab-content .card .card-body{padding:.9375rem}
-    .wrap-body .tab-content .card .table{margin:-.0625rem;font-size:.8125rem}
-    .wrap-body .tab-content .card .card-body .form-group{margin-bottom:0}
-    .wrap-body .tab-content .card .card-body .form-group + .form-group{margin-top:.625rem}
-    .wrap-body .tab-content .card .card-body textarea.form-control,.wrap-body .tab-content .card .card-body pre{height:100%;min-height:2rem;margin-bottom:0;font-size:.8125rem}
-    .wrap-body .tab-content .card .card-body .col-6:first-child{padding-right:.46875rem}
-    .wrap-body .tab-content .card .card-body .col-6:last-child{padding-left:.46875rem}
+.wrap-body{margin-top:4.5rem;padding-bottom:2rem}
+.wrap-body .card .card-header{padding:0}
+.wrap-body .card .list-group-item{padding:.375rem .75rem}
+.wrap-body p{font-size:.875rem;margin-bottom:.625rem}
+.wrap-body pre{padding:.5rem;font-size:.8125rem;word-break:break-all;word-wrap:break-word;background-color:#f5f5f5;border:.0625rem solid #ccc;border-radius:.25rem}
+.wrap-body .tab-content .card + .card{margin-top:1rem}
+.wrap-body .tab-content .card .card-body{padding:.9375rem}
+.wrap-body .tab-content .card .table{margin:-.0625rem;font-size:.8125rem}
+.wrap-body .tab-content .card .card-body .form-group{margin-bottom:0}
+.wrap-body .tab-content .card .card-body .form-group + .form-group{margin-top:.625rem}
+.wrap-body .tab-content .card .card-body textarea.form-control,.wrap-body .tab-content .card .card-body pre{height:100%;min-height:2rem;margin-bottom:0;font-size:.8125rem}
+.wrap-body .tab-content .card .card-body .col-6:first-child{padding-right:.46875rem}
+.wrap-body .tab-content .card .card-body .col-6:last-child{padding-left:.46875rem}
 </style>
 </head>
 
@@ -117,7 +117,21 @@ $this->registerJs($this->render('index.min.js'), $this::POS_END);
  *               {name="avatar", type="string", desc="头像"},
  *               {name="gender", type="integer", desc="性别(0未知;1男;2女)", required=true},
  *               {name="qq", type="string", desc="QQ"},
- *               {name="birthday", type="string", desc="生日"}]
+ *               {name="birthday", type="string", desc="生日"},
+ *               {name="hobby", type="array", each="string", desc="爱好"},
+ *               {name="address", type="object", desc="地址", children=[
+ *                  {name="province", type="integer", desc="省份"},
+ *                  {name="city", type="integer", desc="城市"},
+ *                  {name="address", type="string", desc="详细地址"},
+ *                  {name="phone", type="string", desc="手机"}
+ *               ]},
+ *               {name="orderList", type="list", desc="订单列表", children=[
+ *                  {name="orderId", type="string", desc="订单ID"},
+ *                  {name="goodsId", type="integer", desc="商品ID"},
+ *                  {name="quantity", type="integer", desc="数量"},
+ *                  {name="price", type="float", desc="单价"},
+ *                  {name="amount", type="float", desc="金额"}
+ *              ]}]
  * @apiResponse [{name="id", type="integer", desc="ID"},
  *               {name="username", type="string", desc="手机号"},
  *               {name="email", type="string", desc="邮箱"},
@@ -282,7 +296,7 @@ $this->registerJs($this->render('index.min.js'), $this::POS_END);
                                         <div class="input-group-prepend">
                                             <label class="input-group-text" :for="'header_' + item.name">{{ item.name }}</label>
                                         </div>
-                                        <input type="text" class="form-control" :id="'header_' + item.name" :value="item.default" :placeholder="item.desc" @change="setResHeader(index, item.name, $event)" />
+                                        <input type="text" class="form-control" :id="'header_' + item.name" :value="requestForm.headers[item.name]" :placeholder="item.desc" @change="setResHeader(index, item.name, $event)" />
                                     </div>
                                 </div>
                             </div>
@@ -301,7 +315,7 @@ $this->registerJs($this->render('index.min.js'), $this::POS_END);
                                         <div class="input-group-prepend">
                                             <label class="input-group-text" :for="'param_' + item.name">{{ item.name }}</label>
                                         </div>
-                                        <input type="text" class="form-control" :id="'param_' + item.name" :value="item.default" :placeholder="item.desc" @change="setResParam(index, item.name, $event)" />
+                                        <input type="text" class="form-control" :id="'param_' + item.name" :value="requestForm.params[item.name]" :placeholder="item.desc" @change="setResParam(index, item.name, $event)" />
                                     </div>
                                 </div>
                             </div>
@@ -323,6 +337,7 @@ $this->registerJs($this->render('index.min.js'), $this::POS_END);
                                         <pre id="requestDataView"></pre>
                                     </div>
                                 </div>
+                                <div class="text-center text-danger" v-if="resBodyJsonError">语法错误</div>
                             </div>
                         </div>
                     </div>

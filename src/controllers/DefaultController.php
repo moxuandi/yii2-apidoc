@@ -31,13 +31,14 @@ class DefaultController extends Controller
     public $module;
 
     /**
+     * 登录
      * @return string
      */
     public function actionLogin()
     {
         $model = new LoginForm();
         $model->password = '123456';
-        if($model->load(Yii::$app->request->post()) && $model->login()) {
+        if ($model->load(Yii::$app->request->post()) && $model->login()) {
             $this->redirect(['index']);
         }
         return $this->renderPartial('login', [
@@ -46,6 +47,7 @@ class DefaultController extends Controller
     }
 
     /**
+     * 主页
      * @return string
      * @throws InvalidConfigException
      * @throws ReflectionException
@@ -62,6 +64,7 @@ class DefaultController extends Controller
     }
 
     /**
+     * 获取模块`module`列表.
      * @param string|null $appName
      * @return mixed
      * @throws InvalidConfigException
@@ -73,7 +76,7 @@ class DefaultController extends Controller
         $modules = $app->getModules();
         $result[] = [
             'moduleId' => '',
-            'controllers' => $this->getControllers($app)
+            'controllers' => $this->getControllerList($app)
         ];
         foreach ($modules as $moduleName => $moduleConfig) {
             // 过滤调忽略的模块
@@ -83,19 +86,19 @@ class DefaultController extends Controller
             $module = $app->getModule($moduleName);
             $result[] = [
                 'moduleId' => $moduleName,
-                'controllers' => $this->getControllers($module)
+                'controllers' => $this->getControllerList($module)
             ];
         }
         return $result;
     }
 
     /**
-     * 获取控制器列表
+     * 获取控制器`controller`列表.
      * @param Module $app
      * @return array
      * @throws ReflectionException
      */
-    public function getControllers(Module $app)
+    public function getControllerList(Module $app)
     {
         $controllerPaths = FileHelper::findFiles($app->controllerPath);
         $controllers = [];
@@ -120,23 +123,28 @@ class DefaultController extends Controller
 
             $docBlock = new DocBlock($rc->getDocComment());
 
+            // 跳过标记忽略的控制器
+            if ($docBlock->getTagsByName('apiIgnore')) {
+                continue;
+            }
+
             $controllers[] = [
                 'controllerId' => $controllerId,
                 'controllerName' => $controllerName,
-                'title' => $docBlock->getShortDescription(),
-                //'desc' => $docBlock->getText(),
-                'actions' => $this->getActions($rc),
+                'title' => $this->getTagByName($docBlock, 'apiTitle'),
+                'actions' => $this->getActionList($rc),
             ];
         }
         return $controllers;
     }
 
     /**
+     * 获取控制器的所有方法`action`列表.
      * @param ReflectionClass $rc
      * @return array
      * @throws ReflectionException
      */
-    public function getActions(ReflectionClass $rc)
+    public function getActionList(ReflectionClass $rc)
     {
         // 所有定义为`public`的方法列表
         $methods = $rc->getMethods(ReflectionMethod::IS_PUBLIC);
@@ -147,21 +155,28 @@ class DefaultController extends Controller
             if (in_array($actionName, ['action', 'actions']) || strncasecmp($actionName, 'action', 6) !== 0) {
                 continue;
             }
-            $actions[] = $this->getMethodParams($rc, $actionName);
+
+            $rm = new ReflectionMethod($rc->name, $actionName);
+            $docBlock = new DocBlock($rm->getDocComment());
+
+            // 跳过标记忽略的控制器
+            if ($docBlock->getTagsByName('apiIgnore')) {
+                continue;
+            }
+
+            $actions[] = $this->getActionInfo($docBlock, $actionName);
         }
         return $actions;
     }
 
     /**
-     * @param ReflectionClass $rc
+     * 获取方法`action`的详细信息.
+     * @param DocBlock $docBlock
      * @param string $actionName
      * @return array
-     * @throws ReflectionException
      */
-    public function getMethodParams(ReflectionClass $rc, string $actionName)
+    public function getActionInfo(DocBlock $docBlock, string $actionName)
     {
-        $rm = new ReflectionMethod($rc->name, $actionName);
-        $docBlock = new DocBlock($rm->getDocComment());
         $headers = $this->getTagByName($docBlock, 'apiHeader', 'json') ?? [];
         $params = $this->getTagByName($docBlock, 'apiParam', 'json') ?? [];
         $reqBody = $this->getTagByName($docBlock, 'apiBody', 'list') ?? [];
@@ -173,7 +188,6 @@ class DefaultController extends Controller
             'desc' => $this->getTagByName($docBlock, 'apiDesc') ?? '',
             'route' => $this->getTagByName($docBlock, 'apiRoute') ?? '',
             'method' => $this->getTagByName($docBlock, 'apiMethod') ?? 'GET',
-            //'mediaType' => $this->getTagByName($docBlock, 'mediaType') ?? 'application/json',
             'headers' => $this->formatParams($headers),
             'params' => $this->formatParams($params),
             'reqBody' => $this->formatParams($reqBody),
@@ -182,7 +196,7 @@ class DefaultController extends Controller
     }
 
     /**
-     * 格式化参数列表
+     * 格式化参数列表.
      * @param array $inArr
      * @return array
      */
@@ -195,7 +209,7 @@ class DefaultController extends Controller
             'desc' => '',  // 参数描述
             'default' => null,  // 默认值
             'required' => false,  // 是否必填
-            //'subType' => 'string',  // 数组中的参数类型, array必填
+            //'each' => 'string',  // 数组中的参数类型, array必填
             //'children' => [],  // 列表中的参数, list必填
         ];
         $result = [];
@@ -206,12 +220,13 @@ class DefaultController extends Controller
             }
             $param = array_merge($baseFormat, $item);
             switch ($param['type']) {
-                case 'array':
-                    if (!isset($param['subType']) || empty($param['subType'])) {
-                        $param['subType'] = 'string';
+                case 'array':  // 数组
+                    if (!isset($param['each']) || empty($param['each'])) {
+                        $param['each'] = 'string';
                     }
                     break;
-                case 'list':
+                case 'object':  // 对象
+                case 'list':  // 列表/对象数组
                     if (!isset($param['children']) || empty($param['children'])) {
                         $param['children'] = [];
                     }
@@ -226,7 +241,7 @@ class DefaultController extends Controller
     }
 
     /**
-     * 从注释中读取特定标签的信息
+     * 从注释中读取特定标签的信息.
      * @param DocBlock $docBlock
      * @param string $name
      * @param string $returnType 返回数据的类型
@@ -260,7 +275,7 @@ class DefaultController extends Controller
     }
 
     /**
-     * 解析key没有双引号的JSON字符串
+     * 解析key没有双引号的JSON字符串.
      * eg: {name="recordId", type="integer", desc="记录ID", required=true}
      * eg: {name:"recordId", type:"integer", desc:"记录ID", required:true}
      * @param string $str key没有双引号的JSON字符串
@@ -276,7 +291,32 @@ class DefaultController extends Controller
     }
 
     /**
-     * 初始化应用
+     * 格式化控制器ID.
+     * @param string $controllerName
+     * @return string
+     */
+    public function getControllerId(string $controllerName)
+    {
+        $names = explode('\\', $controllerName);
+        $result = [];
+        foreach ($names as $name) {
+            $result[] = Inflector::camel2id(str_replace('Controller', '', $name));
+        }
+        return implode('/', $result);
+    }
+
+    /**
+     * 格式化动作ID.
+     * @param string $actionName
+     * @return string
+     */
+    public function getActionId(string $actionName)
+    {
+        return Inflector::camel2id(str_replace('action', '', $actionName));
+    }
+
+    /**
+     * 初始化应用.
      * @param string|null $appName 应用名称
      * @return Application
      * @throws InvalidConfigException
@@ -294,30 +334,5 @@ class DefaultController extends Controller
         } else {
             return Yii::$app;
         }
-    }
-
-    /**
-     * 格式化控制器ID
-     * @param string $controllerName
-     * @return string
-     */
-    public function getControllerId(string $controllerName)
-    {
-        $names = explode('\\', $controllerName);
-        $result = [];
-        foreach ($names as $name) {
-            $result[] = Inflector::camel2id(str_replace('Controller', '', $name));
-        }
-        return implode('/', $result);
-    }
-
-    /**
-     * 格式化动作ID
-     * @param string $actionName
-     * @return string
-     */
-    public function getActionId(string $actionName)
-    {
-        return Inflector::camel2id(str_replace('action', '', $actionName));
     }
 }

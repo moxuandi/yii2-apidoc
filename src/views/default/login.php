@@ -18,12 +18,12 @@ $request = Yii::$app->request;
 <!DOCTYPE html>
 <html lang="<?= Yii::$app->language ?>">
 <head>
-    <meta charset="<?= Yii::$app->charset ?>">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <title><?= Html::encode($this->title) ?></title>
-    <?php $this->head() ?>
-    <?php $this->registerCsrfMetaTags() ?>
+<meta charset="<?= Yii::$app->charset ?>">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title><?= Html::encode($this->title) ?></title>
+<?php $this->head() ?>
+<?php $this->registerCsrfMetaTags() ?>
 <style>
 body.login {background-color: #eee;padding-bottom: 2.5rem;padding-top: 2.5rem;}
 .form-signin {margin: 0 auto;max-width: 20rem;padding: 1rem;}

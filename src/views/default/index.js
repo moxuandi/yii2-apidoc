@@ -40,9 +40,10 @@ new Vue({
                         self.activeAction = action;
                         self.activeAction.headers.forEach(item => {
                             if (localStorage.getItem('header_' + item.name)) {
-                                item.default = localStorage.getItem('header_' + item.name);
+                                self.requestForm.headers[item.name] = localStorage.getItem('header_' + item.name);
+                            } else {
+                                self.requestForm.headers[item.name] = item.default;
                             }
-                            self.requestForm.headers[item.name] = item.default;
                         });
                         self.activeAction.params.forEach(item => {
                             self.requestForm.params[item.name] = item.default;
@@ -82,8 +83,12 @@ new Vue({
                     case 'array':
                         defaultVal = item.default ? item.default : [];
                         break;
-                    case 'list':
+                    case 'object':
                         defaultVal = self.formatReqBodyToJson(item.children);
+                        break;
+                    case 'list':
+                        defaultVal = [];
+                        defaultVal.push(self.formatReqBodyToJson(item.children));
                         break;
                     default:
                         break;
@@ -95,33 +100,27 @@ new Vue({
         // 格式化参数列表, 转为二维数组
         formatParams(list) {
             let self = this;
-            list.forEach((item, index) => {
-                if (item.type === 'list' && item.children && item.children.length) {
-                    self.formatParamChildren(item.name, item.children);
-                    list.splice(index + 1, 0, ...item.children);
+            for (let i = 0; i < list.length; i++) {
+                let item = list[i];
+                if (item.children && item.children.length) {
+                    self.formatParamChildren(item.name, item.children, item.type === 'list');
+                    list.splice(i + 1, 0, ...item.children);
                 }
-            });
+            }
         },
         // 递归处理参数子列表
-        formatParamChildren(name, children) {
-            let self = this;
-            children.forEach((item, index) => {
-                item.name = name + '[].' + item.name;
-                if (item.children) {
-                    self.formatParamChildren(item.name, item.children);
-                    children.splice(index + 1, 0, ...item.children);
-                }
+        formatParamChildren(name, children, isList) {
+            children.forEach(item => {
+                item.name = name + (isList ? '[].' : '.') + item.name;
             });
         },
-        // 设置GET参数
+        // 设置Header参数
         setResHeader(index, name, e) {
-            this.activeAction.headers[index].default = e.target.value;
             this.requestForm.headers[name] = e.target.value;
             localStorage.setItem('header_' + name, e.target.value);
         },
         // 设置GET参数
-        setResParam(index,name, e) {
-            this.activeAction.params[index].default = e.target.value;
+        setResParam(index, name, e) {
             this.requestForm.params[name] = e.target.value;
         },
         // 设置POST参数
@@ -131,6 +130,7 @@ new Vue({
                 this.requestForm.data2 = JSON.stringify(this.requestForm.data, null, 4);
                 $('#requestDataView').jsonViewer(this.requestForm.data);
             } catch (e) {
+                this.resBodyJsonError = true;
                 console.log('postData:', '语法错误');
             }
         },
@@ -152,7 +152,7 @@ new Vue({
                 baseURL: self.baseUrl,
                 headers: self.requestForm.headers,
                 params: self.requestForm.params,
-                data: self.requestForm.data,
+                data: self.requestForm.data
             }).then(res => {
                 if (res.status === 200) {
                     self.responseBody = res.data;
@@ -211,6 +211,7 @@ new Vue({
             data: {},
             data2: {},
         },
-        responseBody: null
+        responseBody: null,
+        resBodyJsonError: false
     }
 });
